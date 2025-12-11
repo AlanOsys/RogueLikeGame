@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<head>
+<title>Rogue Like</title>
+
+<style type="text/css">
+body {
+    background-color: rgb(87, 87, 87);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+    outline: none;
+    -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+.Unit{
+    background-color: None;
+    background-size: 40px;
+    position: relative;
+    float: left;
+    
+    height: 40px;
+    width: 40px;
+    margin-left: 10px;
+    margin-top: 30px;
+}
+.Stats{
+    background-color: rgb(171, 103, 159);
+    position: relative;
+    float: left;
+    
+    height: 80px;
+    width: 48px;
+    margin-left: 4px;
+    margin-top: 10px;
+}
+.EnemyUnit{
+    background-size: 40px;
+    position: relative;
+    float: left;
+    
+    height: 40px;
+    width: 40px;
+    margin-left: 10px;
+    margin-top: 35px;
+}
+.UpgradesUnit{
+    background-color: rgb(82, 71, 143);
+    position: relative;
+    float: left;
+    
+    height: 100px;
+    width: 60px;
+    margin-left: 7px;
+    margin-top: 10px;
+}
+.UpgradesBuff{
+background-color: rgb(129, 67, 134);
+    position: relative;
+    float: left;
+    
+    height: 100px;
+    width: 60px;
+    margin-left: 7px;
+    margin-top: 10px;
+}
+
+.LegendaryUpgradesUnit{
+    background-color: rgb(215, 156, 89);
+    position: relative;
+    float: left;
+    
+    height: 100px;
+    width: 60px;
+    margin-left: 7px;
+    margin-top: 8px;
+    outline: none;
+    border: 2px solid rgb(215, 156, 89);
+    
+    border-color: rgb(215, 156, 89);
+    box-shadow: 0 0 10px rgb(215, 156, 89);
+}
+.LegendaryUpgradesBuff{
+    background-color: rgb(215, 156, 89);    
+    position: relative;
+    float: left;
+    
+    height: 100px;
+    width: 60px;
+    margin-left: 7px;
+    margin-top: 8px;
+    outline: none;
+    border: 2px solid rgb(215, 156, 89);
+    
+    border-color: rgb(215, 156, 89);
+    box-shadow: 0 0 10px rgb(215, 156, 89);
+}
+
+
+
+.Pick{
+    background-color: antiquewhite;
+    
+    height: 100px;
+    width: 210px;
+    left: 0px;
+    top: 0px;
+    position: absolute;
+}
+.Pick button{
+    background-color: None;
+    background-size: 40px;
+    position: relative;
+    float: left;
+    
+    height: 40px;
+    width: 40px;
+    margin-left: 10px;
+    margin-top: 30px;
+
+}
+#ShownStats{
+    height: 50px;
+    width: 50px;
+    position: absolute;
+    background-color: aliceblue;
+    
+}
+#currency{
+ position: absolute;
+ left: 0px;
+ top: 450px;
+ font-size: 40px;
+ color: gold;
+
+}
+#reroll{
+ position: absolute;
+ left: 50px;
+ top: 444px;
+ font-size: 40px;
+ color: aliceblue;
+ background-color: transparent;
+ rotate: 90deg;
+ width: 55px;
+
+}
+#Start{
+ position: absolute;
+ left: 110px;
+ top: 448px;
+ font-size: 40px;
+ color: black;
+ background-color: rgb(119, 119, 119);
+}
+#stage{
+    left: 0px;
+    top: 0px;
+    position: absolute;
+    font-size: 30px;
+}
+#Backdrop{
+    width: 210px;
+    height: 500px;
+    background-color: black;
+    opacity: 50%;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 100;
+}
+#ToDevourContainer{
+    width: 210px;
+    height: 100px;
+    background-color: rgb(124, 55, 55);
+    opacity: 100%;
+    position: absolute;
+    left: 0px;
+    top: 100px;
+    z-index: 200;
+}
+.EntityButton{
+    background-color: None;
+    background-size: 40px;
+    position: relative;
+    float: left;
+    
+    height: 40px;
+    width: 40px;
+    margin-left: 10px;
+    margin-top: 30px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+    
+    <div id="container" style="position: absolute;left: 00%;top: 100px; width: 210px;height: 100px; background-color: rgb(119, 119, 119);"></div>
+    <div id="EnemyContainer" style="position: absolute;left: 00%;top: 0px; width: 210px;height: 100px; background-color: rgb(119, 119, 119);"></div>
+    <div id="Upgrades" style="position: absolute;left: 00%;top: 300px; width: 210px;height: 200px; background-color: rgb(51, 51, 51);"></div>
+    <div id="StatContainer" style="position: absolute;left: 00%;top: 200px; width: 210px;height: 100px; background-color: rgb(101, 101, 101);"></div>
+    <div id="currency">6</div>
+    <button id="reroll" onclick="ShuffleNewCards(1)">&#8635;</button>
+    <button id="Start" onclick="StartRun()">Start</button>
+    <div id="stage">Stage: 1</div>
+    
+    
+
+<script>
+    Container = document.getElementById("container")
+    EnemyContainer = document.getElementById("EnemyContainer")
+    Upgrades = document.getElementById("Upgrades")
+    StatContainer = document.getElementById("StatContainer")
+    Team = []
+    SpawnedTeam = []
+    Enemies = []
+    EnemyInstances = []
+    UnitUpgrades = []
+    class Unit{
+        constructor(Health, Attack, Speed, ID){
+            this.Health = Health
+            this.Attack = Attack
+            this.Speed = Speed
+            this.ID = ID
+        }
+        Spawn(){
+            var UnitEntity = document.createElement("div")
+            UnitEntity.className = "Unit"
+            UnitEntity.id = this.ID
+            UnitEntity.style.backgroundImage = "url(Images/Boios/"+this.ID+".png)"
+            var UnitStats = this
+            var UnitHealth = document.createElement("div")
+            UnitHealth.style.height = "10px"
+            UnitHealth.style.width = this.Health*4+"px"
+            UnitHealth.style.transform = "translateY(40px)"
+            UnitHealth.style.backgroundColor = "rgb(0, 206, 0)"
+            UnitEntity.appendChild(UnitHealth)
+
+            var StatEntity  = document.createElement("div")
+            StatEntity.className = "Stats"
+            //StatEntity.id = this.ID
+            StatEntity.innerHTML = "HP:"+this.Health + " Atk:"+this.Attack + " Spd:"+this.Speed
+            StatContainer.appendChild(StatEntity)
+            if(UnitEntity.id == "PoisonSlug"){
+                UnitEntity.onclick = function devourAlly(){
+                    var Backdrop = document.createElement("div")
+                    Backdrop.id = "Backdrop"
+                    var ToDevourContainer = document.createElement("div")
+                    Backdrop.onclick = function BackdropClick(){
+                        Backdrop.remove()
+                        ToDevourContainer.remove()
+                    }
+                    
+                    ToDevourContainer.id = "ToDevourContainer"
+                    for(let i = 0;i<document.getElementById("container").children.length;i++){
+                        console.log(String(document.getElementById("container").children[i].style.backgroundImage))
+                        if(String(document.getElementById("container").children[i].style.backgroundImage)!='url("Images/Boios/PoisonSlug.png")'){                  
+                            var EntityButton = document.createElement("button")
+                            EntityButton.style.backgroundImage = String(document.getElementById("container").children[i].style.backgroundImage)
+                            EntityButton.className = "EntityButton"
+                            EntityButton.onclick = function PickEntity(){
+                                var EntityAssigned = String(document.getElementById("container").children[i].style.backgroundImage).split('"')[1]
+                                document.getElementById("container").children[i].remove()
+                                var additiveStats = document.getElementById("StatContainer").children[i].innerHTML.split(" ")
+                                UnitStats.Health += parseInt(additiveStats[0].split(":")[1])
+                                UnitStats.Attack += parseInt(additiveStats[1].split(":")[1])
+                                UnitStats.Speed += parseInt(additiveStats[2].split(":")[1])
+                                UnitStats.UpdateStats()
+                                Team.splice(i,1)
+
+                                document.getElementById("StatContainer").children[i].remove()
+                                Backdrop.remove()
+                                EntityButton.parentElement.remove()
+                            }
+                            ToDevourContainer.appendChild(EntityButton)
+                        }
+                    }
+                    document.body.appendChild(ToDevourContainer)
+                    document.body.appendChild(Backdrop)
+                }
+            }
+            
+            
+            
+            
+            /*UnitEntity.onmouseenter = function ShowStats(){
+                if(document.getElementById("ShownStats")){
+                    document.getElementById("ShownStats").remove()
+                }
+                
+                var ShownStats = document.createElement("div")
+                ShownStats.style.left = event.clientX +"px";
+                ShownStats.style.top = event.clientY +"px";
+                ShownStats.innerHTML = UnitStats.Health+","+UnitStats.Attack+","+UnitStats.Speed
+                ShownStats.id = "ShownStats"
+                document.body.appendChild(ShownStats)
+            }
+            UnitEntity.onmouseleave = function KillStats(){
+                document.getElementById("ShownStats").remove()
+            }*/
+            
+            Container.appendChild(UnitEntity)
+            Team.push(this)
+            SpawnedTeam.push(UnitEntity)
+        }
+        EnemySpawn(){
+            var EnemyUnitEntity = document.createElement("div")
+            EnemyUnitEntity.className = "EnemyUnit"
+            EnemyUnitEntity.style.backgroundImage = "url(Images/Enemies/"+this.ID+".png)"
+            EnemyUnitEntity.id = this.ID
+            
+            
+            var UnitStats = this
+            var EnemyUnitHealth = document.createElement("div")
+            EnemyUnitHealth.style.height = "10px"
+            EnemyUnitHealth.style.width = this.Health*4+"px"
+            EnemyUnitHealth.style.transform = "translateY(40px)"
+            EnemyUnitHealth.style.backgroundColor = "rgb(0, 206, 0)"
+            EnemyUnitEntity.appendChild(EnemyUnitHealth)
+            
+            
+            /*UnitEntity.onmouseenter = function ShowStats(){
+                if(document.getElementById("ShownStats")){
+                    document.getElementById("ShownStats").remove()
+                }
+                
+                var ShownStats = document.createElement("div")
+                ShownStats.style.left = event.clientX +"px";
+                ShownStats.style.top = event.clientY +"px";
+                ShownStats.innerHTML = UnitStats.Health+","+UnitStats.Attack+","+UnitStats.Speed
+                ShownStats.id = "ShownStats"
+                document.body.appendChild(ShownStats)
+            }
+            UnitEntity.onmouseleave = function KillStats(){
+                document.getElementById("ShownStats").remove()
+            }*/
+            
+            EnemyContainer.appendChild(EnemyUnitEntity)
+            EnemyInstances.push(EnemyUnitEntity)
+            Enemies.push(this)
+        }
+        UpdateStats(){
+            for(let i = 0;i<Team.length;i++){
+                if(Team[i] == this){
+                    var additiveStats = document.getElementById("StatContainer").children[i].innerHTML = "HP:"+this.Health+" Atk:"+this.Attack+" Spd:"+this.Speed
+
+                }
+            }
+        }
+        UpgradeUnit(Health, Attack, Speed, ID){
+            UnitUpgrades.push(ID)
+            UnitUpgrades.push([parseInt(Health*0.5),parseInt(Attack*0.5),parseInt(Speed*0.5)])
+            var i = 0
+            for(i;i<Team.length;i++){
+                
+                if(ID ==Team[i].ID ){
+                    
+                    break
+                }
+            }
+            Team[i].Health += parseInt(Health*0.5)
+
+            Team[i].Attack += parseInt(Attack*0.5)
+            Team[i].Speed += parseInt(Speed*0.5)
+            if(Team[i].Health<10){
+                SpawnedTeam[i].children[0].style.width = Team[i].Health*4+"px"
+            }else{
+                var currentHP = Team[i].Health*4
+                var healthBarAmount = 0
+                SpawnedTeam[i].children[0].style.width ="40px"
+                currentHP-=40
+                while(SpawnedTeam[i].children.length>1){
+                    SpawnedTeam[i].lastChild.remove()
+                }
+                while(currentHP > 0){
+                    
+                    var EnemyUnitHealth = document.createElement("div")
+                    EnemyUnitHealth.style.height = "10px"
+                    if(currentHP < 40){
+                        EnemyUnitHealth.style.width = (currentHP)+"px"
+                    }else{
+                        EnemyUnitHealth.style.width = "40px"
+                    }
+                    
+                    EnemyUnitHealth.style.transform = "translateY(40px)"
+                    EnemyUnitHealth.style.backgroundColor = "rgb(0, 206, 0)"
+                    EnemyUnitHealth.style.zIndex = "-100"
+                    SpawnedTeam[i].appendChild(EnemyUnitHealth)
+                    currentHP-= 40
+                }
+                
+                
+
+            }
+
+            StatContainer.children[i].innerHTML = "HP:"+Team[i].Health + " Atk:"+Team[i].Attack + " Spd:"+Team[i].Speed
+            
+        }
+
+    }
+    class Upgrade{
+        constructor(Type, Buff, Stat, Unit, Cost){
+            if(Type == "Buff"){
+                this.Type = Type
+                this.Stat = Stat
+                this.Buff = Buff
+            }
+            if(Type == "Unit"){
+                this.Type = Type
+                this.Stats = [(0,0,0)]
+                
+                this.Unit = Unit
+
+            }
+            this.Cost = Cost
+        }
+        GetUpgradeCard(){
+            //for(let i = 0;i<3;i++){
+            var UpgradeEntity = document.createElement("div")
+            UpgradeEntity.className = ("Upgrades"+this.Type)
+            if(this.Cost >= 6){
+                UpgradeEntity.className = ("LegendaryUpgrades"+this.Type)
+            }
+            
+            if(this.Type == "Buff"){
+                var StatBuff = document.createElement("p")
+                StatBuff.innerHTML = this.Stat
+                UpgradeEntity.appendChild(StatBuff)
+
+                var Buff = document.createElement("p")
+                Buff.innerHTML = "+"+this.Buff
+                Buff.style.color = "rgb(0, 223, 0)"
+                Buff.style.marginBottom = "-0.5px"
+                UpgradeEntity.appendChild(Buff)
+
+                var Rarity = document.createElement("p")
+                Rarity.style.color = "gold"
+                Rarity.innerHTML = this.Cost
+                UpgradeEntity.appendChild(Rarity)
+                
+
+            }
+            if(this.Type == "Unit"){
+                var UnitType = document.createElement("div")
+                //UnitType.innerHTML = this.Unit
+                UnitType.style.backgroundImage = "url(Images/Boios/"+this.Unit+".png)"
+                UnitType.style.backgroundSize = "40px"
+                UnitType.style.marginTop = "3px"
+                UnitType.style.width = "40px"
+                UnitType.style.height = "40px"
+                UpgradeEntity.appendChild(UnitType)
+                var Stats = document.createElement("p")
+                Stats.style.color = "white"
+                Stats.style.marginBottom = "-1px"
+                Stats.style.marginTop = "8px"
+
+                //CHECK UPGRADES
+                /*if(UnitUpgrades.includes(Name)){
+                    
+                    Rarity+=countOccurrences(UnitUpgrades,Name)
+                }*/
+                var UpgradesArray = [0,0,0]
+                for(let i = 0;i<UnitUpgrades.length;i+=2){
+                    if(UnitUpgrades[i]==this.Unit){
+                        UpgradesArray[0] += UnitUpgrades[i+1][0]
+                        UpgradesArray[1] += UnitUpgrades[i+1][1]
+                        UpgradesArray[2] += UnitUpgrades[i+1][2]
+                    }
+                }
+                this.Stats = [parseInt(Math.random()*3+this.Cost+UpgradesArray[0]),parseInt(Math.random()*3+this.Cost+UpgradesArray[1]),parseInt(Math.random()*3+this.Cost+UpgradesArray[2])]
+                
+                Stats.innerHTML = String([parseInt(this.Stats[0]*0.5+1),parseInt(this.Stats[1]*0.5+1),parseInt(this.Stats[2]*0.5+1)])
+                
+                UpgradeEntity.appendChild(Stats)
+                var Rarity = document.createElement("p")
+                Rarity.style.color = "gold"
+                Rarity.innerHTML = this.Cost
+                UpgradeEntity.appendChild(Rarity)
+                //UpgradeEntity.appendChild(Buff)
+            }
+            var ThisCard = this
+            UpgradeEntity.onclick = function CardUse(){
+                
+                if(ThisCard.Type == "Buff" && parseInt(document.getElementById("currency").innerHTML) >= ThisCard.Cost){
+
+                    var PickEntityToUpgrade = document.createElement("div")
+                    PickEntityToUpgrade.className = "Pick"
+                    
+                    for(let j = 0;j<Team.length;j++){
+                        var EntityButton = document.createElement("button")
+                        EntityButton.style.backgroundImage = "url(Images/Boios/"+Team[j].ID+".png)"
+                        EntityButton.onclick = function PickEntity(){
+                            if(ThisCard.Stat == "Attack"){
+                                Team[j].Attack += ThisCard.Buff
+                            }
+                            if(ThisCard.Stat == "Health"){
+                                Team[j].Health += ThisCard.Buff
+                                if(Team[j].Health<10){
+                                    SpawnedTeam[j].children[0].style.width = Team[j].Health*4+"px"
+                                }else{
+                                    var currentHP = Team[j].Health*4
+                                    var healthBarAmount = 0
+                                    SpawnedTeam[j].children[0].style.width ="40px"
+                                    currentHP-=40
+                                    while(SpawnedTeam[j].children.length>1){
+                                        SpawnedTeam[j].lastChild.remove()
+                                    }
+                                    while(currentHP > 0){
+                                        
+                                        var EnemyUnitHealth = document.createElement("div")
+                                        EnemyUnitHealth.style.height = "10px"
+                                        if(currentHP < 40){
+                                            EnemyUnitHealth.style.width = (currentHP)+"px"
+                                        }else{
+                                            EnemyUnitHealth.style.width = "40px"
+                                        }
+                                        
+                                        EnemyUnitHealth.style.transform = "translateY(40px)"
+                                        EnemyUnitHealth.style.backgroundColor = "rgb(0, 206, 0)"
+                                        EnemyUnitHealth.style.zIndex = "-100"
+                                        SpawnedTeam[j].appendChild(EnemyUnitHealth)
+                                        currentHP-= 40
+                                    }
+                                    
+                                    
+
+                                }
+                                
+                            }
+                            if(ThisCard.Stat == "Speed"){
+                                Team[j].Speed += ThisCard.Buff
+                            }
+                            StatContainer.children[j].innerHTML = "HP:"+Team[j].Health + " Atk:"+Team[j].Attack + " Spd:"+Team[j].Speed
+                            ShuffleNewCards()
+                            document.getElementById("currency").innerHTML = parseInt(document.getElementById("currency").innerHTML) - ThisCard.Cost
+                            EntityButton.parentElement.remove()
+                        }
+                        PickEntityToUpgrade.appendChild(EntityButton)
+                    }
+                    document.body.appendChild(PickEntityToUpgrade)
+                }
+                if(ThisCard.Type == "Unit" && parseInt(document.getElementById("currency").innerHTML) >= ThisCard.Cost){
+                    var UnitIDs = []
+                    for(let i=0;i<Team.length;i++){
+                        UnitIDs.push(Team[i].ID)
+                    }
+                    
+                    if(UnitIDs.includes(ThisCard.Unit)){
+                        var TestUnit = new Unit(ThisCard.Stats[0],ThisCard.Stats[1],ThisCard.Stats[2],ThisCard.Unit)
+                        TestUnit.UpgradeUnit(ThisCard.Stats[0],ThisCard.Stats[1],ThisCard.Stats[2],ThisCard.Unit)
+                        document.getElementById("currency").innerHTML = parseInt(document.getElementById("currency").innerHTML) - ThisCard.Cost
+                        ShuffleNewCards()
+                    }
+                    if(Team.length != 4 && !UnitIDs.includes(ThisCard.Unit)){
+                        
+                        var TestUnit = new Unit(ThisCard.Stats[0],ThisCard.Stats[1],ThisCard.Stats[2],ThisCard.Unit)
+                        TestUnit.Spawn()
+                        document.getElementById("currency").innerHTML = parseInt(document.getElementById("currency").innerHTML) - ThisCard.Cost
+                        ShuffleNewCards()
+
+                    }
+                    
+                }
+            }
+            
+            Upgrades.appendChild(UpgradeEntity)
+            //}
+        }
+    }
+    //TestUnit = new Unit(1,2,3,"Test")
+    //TestUnit.Spawn()
+    
+    
+    
+    function ShuffleNewCards(cost=0){
+        if(cost > 0){
+            if(parseInt(document.getElementById("currency").innerHTML)<cost){
+                return
+            }else{
+                document.getElementById("currency").innerHTML = parseInt(document.getElementById("currency").innerHTML)-cost
+            }
+            
+        }
+        while(Upgrades.lastChild){
+            Upgrades.lastChild.remove()
+        }
+        for(let i = 0;i<3;i++){
+            PickProb = parseInt(Math.random()*2)
+            Rarity = parseInt(Math.random()*Stage+1)
+            if(PickProb == 2){
+                Stats = ["Attack", "Speed", "Health"]
+                StatPickProb = parseInt(Math.random()*3-0.1)
+                TestUpgrade = new Upgrade("Buff",parseInt(Math.random()*3+Rarity),Stats[StatPickProb],10,Rarity)
+                TestUpgrade.GetUpgradeCard()
+            }
+            else{// if(PickProb == 1){
+                
+                if(Rarity == 1){
+                    RarityPool = ["MagRogue","MrMoneyBags"]
+                    Name = RarityPool[Math.floor(Math.random()*RarityPool.length)]
+                }else if(Rarity == 2){
+                    RarityPool = ["Merman"]
+                    Name = RarityPool[Math.floor(Math.random()*RarityPool.length)]
+                }else if(Rarity == 3){
+                    RarityPool = ["PoisonSlug"]
+                    Name = RarityPool[Math.floor(Math.random()*RarityPool.length)]
+                }else if(Rarity == 4){
+                    RarityPool = ["GreenWiz"]
+                    Name = RarityPool[Math.floor(Math.random()*RarityPool.length)]
+                }else if(Rarity == 5){
+                    RarityPool = ["IceNomad"]
+                    Name = RarityPool[Math.floor(Math.random()*RarityPool.length)]
+                }else if(Rarity == 6){
+                    RarityPool = ["FrisbeeWoman"]
+                    Name = RarityPool[Math.floor(Math.random()*RarityPool.length)]
+                }
+                if(UnitUpgrades.includes(Name)){
+                    
+                    Rarity+=countOccurrences(UnitUpgrades,Name)
+                }
+                TestUpgrade = new Upgrade("Unit",0,0,Name,Rarity)
+                TestUpgrade.GetUpgradeCard()
+            }
+            
+        }
+    }
+    
+    Array.prototype.max = function() {
+    return Math.max.apply(null, this);
+    };
+
+    Array.prototype.min = function() {
+    return Math.min.apply(null, this);
+    };
+    /*TestUpgrade = new Upgrade("Unit",10,"Attack","Dude")
+    TestUpgrade.GetUpgradeCard()
+    TestUpgrade = new Upgrade("Buff",5,"Health",10)
+    TestUpgrade.GetUpgradeCard()*/
+    Stage = 1
+    Difficulty = 0
+    //iteration = 1
+    function StartRun(){
+        if(document.getElementById("line")){
+            document.getElementById("line").remove()
+        }
+        document.getElementById("Start").innerHTML = "Next"
+        document.getElementById("Start").style.left = "112px"
+
+        document.getElementById("Start").onclick = "";
+        
+        
+        document.getElementById("Start").style.pointerEvents = "none";
+        if(EnemyContainer.children.length != 0){
+            checkDeath = true
+            for(let i = 0;i<EnemyContainer.children.length;i++){
+                if(EnemyContainer.children[i].style.backgroundColor != "grey"){
+                    checkDeath = false
+                    break
+                }
+            }
+            if(checkDeath){
+                EnemyContainer.lastChild.remove()
+            }
+        }
+        if(EnemyContainer.children.length == 0){
+            Stage++
+            document.getElementById("stage").innerHTML = "Stage: "+Stage
+            for(let i = 0;i<(Math.floor(Stage/3)+1);i++){
+                EnemyList = ["AbyssKnight","Angel","ChillyMage","DarkEnergyBomber","Drowned","GoldFish","HauntedCastle","LavaCat","Scavenger","SnowWitch","SpearGoblin","SpearMorph","SwordShieldGoblin","Valkyrie"]
+                TestEnemy = new Unit(parseInt(Math.random()*(Stage*2)+3),parseInt(Math.random()*(Stage*2.5)),parseInt(Math.random()*(Stage*2.3)),EnemyList[Math.floor(Math.random() * EnemyList.length)])
+                TestEnemy.EnemySpawn()
+            }
+            
+            // TestEnemy2 = new Unit(10,12,5,"TestEnemy2")
+            // TestEnemy2.EnemySpawn()
+        }
+        
+        //for(let rounds = 0;rounds<100;rounds++){
+        
+        var SpeedQueuetemp = []
+        var SpeedQueue = []
+        var SpeedUnits = []
+
+        console.log("Enemies")
+        console.log(Enemies)
+        for(let i = 0;i<Team.length;i++){
+           
+            if(Team[i].Health > 0){
+                currentSpeed = Team[i].Speed
+                SpeedQueuetemp.push(currentSpeed)
+                SpeedUnits.push(Team[i])
+            }
+        }
+        for(let i = 0;i<Enemies.length;i++){
+           
+            if(Enemies[i].Health>0){
+                currentSpeed = Enemies[i].Speed
+                SpeedQueuetemp.push(currentSpeed)
+                SpeedUnits.push(Enemies[i])
+            } 
+        }
+                       
+        
+        
+        for(let i = 0;i<SpeedQueuetemp.length;i++){
+            //console.log("Second Check")
+            //console.log(SpeedQueuetemp)
+            //console.log(SpeedUnits[SpeedQueuetemp.indexOf(SpeedQueuetemp.max())])
+            maxIndex = SpeedQueuetemp.indexOf(SpeedQueuetemp.max())
+            SpeedQueue.push(SpeedUnits[maxIndex])
+            //console.log(SpeedUnits[maxIndex])
+            //console.log(SpeedQueuetemp)
+            SpeedQueuetemp[maxIndex] = -1
+            
+            
+        }
+        console.log("Queues")
+        console.log(SpeedQueue)
+        console.log(SpeedQueuetemp)
+        //Get speeds, go from highest to lowest speed and minus attack from health of a random enemy if ally and vice versa
+        for(let i = 0;i<SpeedQueue.length;i++){
+            timer = 1000*(i+1)
+            document.getElementById("Start").onclick = "";
+            document.getElementById("Start").style.pointerEvents = "none";
+            setTimeout(() => {
+                    console.log("SpeedQueue")
+                    console.log(SpeedQueue)
+                    if(Team.includes(SpeedQueue[i])){
+                        if(SpeedQueue[i].ID != "FrisbeeWoman"){
+
+                        
+                        randomAllyChoice = parseInt(Math.random()*(Enemies.length))
+                   
+                        neg = parseInt(EnemyInstances[randomAllyChoice].lastChild.style.width)-(SpeedQueue[i].Attack*4)
+                        if(neg<0){
+                            if(EnemyInstances[randomAllyChoice].children.length > 1){
+                                EnemyInstances[randomAllyChoice].lastChild.remove()
+                                EnemyInstances[randomAllyChoice].lastChild.style.width = (40+neg)+"px"
+                            }else{
+                                neg = 0
+                                EnemyInstances[randomAllyChoice].lastChild.style.width = (neg)+"px"
+                            }
+                        }else{
+                            EnemyInstances[randomAllyChoice].lastChild.style.width = (neg)+"px"
+                        }
+                        
+                        indx = Team.indexOf(SpeedQueue[i])
+                        var rect = EnemyInstances[randomAllyChoice].getBoundingClientRect();
+                        var rect2 = SpawnedTeam[indx].getBoundingClientRect();
+                        
+                        linedraw(rect.left+(rect.right-rect.left)/2,rect.bottom,rect2.left+(rect2.right-rect2.left)/2,rect2.top,"ally")
+                        Enemies[randomAllyChoice].Health -= SpeedQueue[i].Attack
+                        if(Enemies[randomAllyChoice].Health<=0){
+                            EnemyInstances[randomAllyChoice].style.backgroundColor = "grey"
+
+                            EnemyInstances.splice(randomAllyChoice,1)
+                            Enemies.splice(randomAllyChoice,1)
+                            document.getElementById("currency").innerHTML = parseInt(document.getElementById("currency").innerHTML)+2
+                           
+                            
+                        }
+                    }else{
+                        //ATTACK ALL
+                        AmountOfEnemies = Enemies.length
+                        for(let randomAllyChoice = 0;randomAllyChoice<AmountOfEnemies;randomAllyChoice++){
+                            neg = parseInt(EnemyInstances[randomAllyChoice].lastChild.style.width)-(SpeedQueue[i].Attack*4)
+                            if(neg<0){
+                                if(EnemyInstances[randomAllyChoice].children.length > 1){
+                                    EnemyInstances[randomAllyChoice].lastChild.remove()
+                                    EnemyInstances[randomAllyChoice].lastChild.style.width = (40+neg)+"px"
+                                }else{
+                                    neg = 0
+                                    EnemyInstances[randomAllyChoice].lastChild.style.width = (neg)+"px"
+                                }
+                            }else{
+                                EnemyInstances[randomAllyChoice].lastChild.style.width = (neg)+"px"
+                            }
+                            
+                            indx = Team.indexOf(SpeedQueue[i])
+                            var rect = EnemyInstances[randomAllyChoice].getBoundingClientRect();
+                            var rect2 = SpawnedTeam[indx].getBoundingClientRect();
+                            
+                            linedraw(rect.left+(rect.right-rect.left)/2,rect.bottom,rect2.left+(rect2.right-rect2.left)/2,rect2.top,"ally")
+                            Enemies[randomAllyChoice].Health -= SpeedQueue[i].Attack
+                            if(Enemies[randomAllyChoice].Health<=0){
+                                EnemyInstances[randomAllyChoice].style.backgroundColor = "grey"
+
+                                EnemyInstances.splice(randomAllyChoice,1)
+                                Enemies.splice(randomAllyChoice,1)
+                                randomAllyChoice--;
+                                document.getElementById("currency").innerHTML = parseInt(document.getElementById("currency").innerHTML)+2
+                            
+                                
+                            }
+                        }
+                        
+                    }
+                    }
+                    
+                    if(Enemies.includes(SpeedQueue[i])){
+                    
+                        randomEnemyChoice = parseInt(Math.random()*(Team.length))
+                        
+                        neg = parseInt(SpawnedTeam[randomEnemyChoice].lastChild.style.width)-(SpeedQueue[i].Attack*4)
+                        
+                        if(neg<0){
+                            if(SpawnedTeam[randomEnemyChoice].children.length > 1){
+                                SpawnedTeam[randomEnemyChoice].lastChild.remove()
+                                SpawnedTeam[randomEnemyChoice].lastChild.style.width = (40+neg)+"px"
+                            }else{
+                                neg = 0
+                                SpawnedTeam[randomEnemyChoice].lastChild.style.width = (neg)+"px"
+                            }
+                        }else{
+                            SpawnedTeam[randomEnemyChoice].lastChild.style.width = (neg)+"px"
+                        }
+                        
+                        //SpawnedTeam[randomEnemyChoice].children[0].style.width = neg +"px"
+                        /*
+                        parseInt(SpawnedTeam[randomEnemyChoice].style.left),
+                        parseInt(SpawnedTeam[randomEnemyChoice].style.top),
+                        parseInt(EnemyInstances[indx].style.left),
+                        parseInt(EnemyInstances[indx].style.top)*/
+                        indx = Enemies.indexOf(SpeedQueue[i])
+                        var rect = EnemyInstances[indx].getBoundingClientRect();
+                        var rect2 = SpawnedTeam[randomEnemyChoice].getBoundingClientRect();
+                        
+                        linedraw(rect.left+(rect.right-rect.left)/2,rect.bottom,rect2.left+(rect2.right-rect2.left)/2,rect2.top,"enemy")
+                     
+                        //EnemyInstances[indx].style.top = SpawnedTeam[randomEnemyChoice].style.top
+                        //EnemyInstances[indx].style.top = storedPosLeft
+                        
+                        
+                        
+                        Team[randomEnemyChoice].Health -= SpeedQueue[i].Attack
+                        StatContainer.children[randomEnemyChoice].innerHTML = "HP:"+Team[randomEnemyChoice].Health + " Atk:"+Team[randomEnemyChoice].Attack + " Spd:"+Team[randomEnemyChoice].Speed
+                        
+                        if(Team[randomEnemyChoice].Health<=0){
+                            
+                            //setTimeout(() => {
+                            SpawnedTeam[randomEnemyChoice].style.backgroundColor = "grey"//.remove()
+                            SpawnedTeam.splice(randomEnemyChoice,1)
+                            Team.splice(randomEnemyChoice,1)
+                            //}, timer+200);
+                            
+                        }
+                        //SpeedQueue.splice(0,1)
+                    }
+                
+                //if(Team.length>0&&Enemies.length>0){
+                //    StartRun()
+                //}
+                if(Team.length == 0){
+                    //die
+                    //StartUP()
+                }
+                for(let i = 0;i<Container.children.length;i++){
+                        if(Container.children[i].style.backgroundColor == "grey"){
+                            Container.children[i].remove()
+                            StatContainer.children[i].remove()
+                        }
+                    }
+                    for(let i = 0;i<EnemyContainer.children.length;i++){
+                        if(EnemyContainer.children[i].style.backgroundColor == "grey"){
+                            EnemyContainer.children[i].remove()
+                        }
+                    }
+                if(Enemies.length == 0){
+                    if(Stage == 9){
+                        console.log("you win")
+                    }
+                    if(document.getElementById("line")){
+                        //document.getElementById("line").remove()
+                    }
+                    
+                    //document.getElementById("Start").innerHTML = "Start"
+                    //document.getElementById("Start").style.left = "110px"
+                    if(Enemies.length == 0){
+                        setTimeout(() => {
+                        document.getElementById("Start").innerHTML = "Start"
+                                document.getElementById("Start").style.left = "110px"
+                        }, 1000*(SpeedQueue.length));
+                    }
+                    
+                    
+              
+                }
+                document.getElementById("Start").style.pointerEvents = "";
+                document.getElementById("Start").onclick = function r(){StartRun()}
+
+            }, timer,("Turn"+i));
+            
+            
+            
+        }
+        
+        
+        
+        
+    }
+    function StartUP(){
+        Stage = 1
+        while (EnemyContainer.lastElementChild) {
+            EnemyContainer.removeChild(EnemyContainer.lastElementChild);
+        }
+        while (Container.lastElementChild) {
+            Container.removeChild(Container.lastElementChild);
+        }
+        while (StatContainer.lastElementChild) {
+            StatContainer.removeChild(StatContainer.lastElementChild);
+        }
+        TestUnit2 = new Unit(5,5,5,"BatUm")
+        TestUnit2.Spawn()
+        ShuffleNewCards()
+    }
+    StartUP()
+    const countOccurrences = (arr, val) =>
+  arr.reduce((a, v) => (v === val ? a + 1 : a), 0);
+function linedraw(x1, y1, x2, y2,EorA,mult=false) {
+    if(document.getElementById("line") && !mult){
+        document.getElementById("line").remove()
+    }else if(document.getElementById("line") && mult){
+        //if(document.getElementsByClassName("line").length == )
+    }
+    
+    if (x2 < x1) {
+        var tmp;
+        tmp = x2 ; x2 = x1 ; x1 = tmp;
+        tmp = y2 ; y2 = y1 ; y1 = tmp;
+    }
+
+    var lineLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    var m = (y2 - y1) / (x2 - x1);
+
+    var degree = Math.atan(m) * 180 / Math.PI;
+    line = document.createElement("div")
+    line.id = "line"
+    line.className = "line"
+    line.style.width = 0
+    line.style = "transition:0.5s;transform-origin: top left; transform: rotate(" + degree + "deg); width: " + lineLength + "px; height: 3px; background: black; position: absolute; top: " + y1 + "px; left: " + x1 + "px;"
+    
+    if(EorA=="enemy"){
+        line.style.backgroundColor = "red"
+    }else{
+        line.style.backgroundColor = "green"
+    }
+    document.body.appendChild(line)
+
+    /*setTimeout(() => {
+          document.body.line.remove()
+    }, 200);*/
+
+}
+</script>
+<!--
+ideas:
+have currency you get for winning combat to buy things
+perhaps some form of map where you raid things, maybe a similar exploration as the one in that one game with the elf and priestess
+adding previously successful units from other peoples runs to your runs through buying.
+Unit ideas:
+a unit that allows you to eat other units to gain half their stats
+a unit that is able to revive a unit after death if theyre alive
+if i go with raiding, units that allows you to explore sections you couldnt usually
+mrmoneybags allows the possibility for money backs to appear in shop to let you get some gold
+poisonslug should be able to be clicked and pop menu appear to eat a unit to get 0.25 stats
+allow unit selling as well
+-->
+</body>
+
